@@ -80,45 +80,54 @@ select "Expand S-expression" from the context menu.
                               ↦ ,_)
                             #:when (sexp-pp-write-special?)
                             1]
-                           [_ #f])]
+                           [_ (old-size-hook v display-mode? out-port)])]
                         [else #f]))]
                    [pretty-print-print-hook
                     (λ (v display-mode? out-port)
-                      (define-values (line col pos)
-                        (port-next-location out-port))
-                      (define remaining-width
-                        (max minimum-columns
-                             (- (pretty-print-columns) col)))
-                      (define text
-                        (new (get-racket:text%-class)))
-                      (define latest-size-hook (pretty-print-size-hook))
-                      (parameterize ([current-output-port (open-output-text-editor text)]
-                                     [sexp-pp-write-special? #t]
-                                     [pretty-print-size-hook
-                                      (λ (new-v display-mode? out-port)
-                                        (and (not (equal? v new-v))
-                                             (latest-size-hook new-v
-                                                               display-mode?
-                                                               out-port)))])
-                        (port-count-lines! (current-output-port))
-                        (write-string (build-string col (λ (index) #\space)))
-                        (pretty-write v #:newline? #f))
-                      (send text split-snip col)
-                      (define snips
-                        (let loop ([snip (send text find-snip col 'after)])
-                          (if snip
-                              (cons (send snip copy) (loop (send snip next)))
-                              '())))
-                      (define s
-                        (new (get-racket:sexp-snip%-class)
-                             [left-bracket #\(]
-                             [right-bracket #\)]
-                             [saved-snips snips]))
-                      (cond
-                        [(sexp-pp-write-special?)
-                         (write-special s out-port)]
-                        [else
-                         (old-print-hook s display-mode? out-port)]))])
+                      (match v
+                        [(or `(env . ,_)
+                             `(,(or (? (prefix-match? 'lambda))
+                                    (? (prefix-match? 'let))
+                                    (? (prefix-match? 'let-syntax))
+                                    (? (prefix-match? 'if)))
+                               ↦ ,_))
+                         (define-values (line col pos)
+                           (port-next-location out-port))
+                         (define remaining-width
+                           (max minimum-columns
+                                (- (pretty-print-columns) col)))
+                         (define text
+                           (new (get-racket:text%-class)))
+                         (define latest-size-hook (pretty-print-size-hook))
+                         (parameterize ([current-output-port (open-output-text-editor text)]
+                                        [sexp-pp-write-special? #t]
+                                        [pretty-print-size-hook
+                                         (λ (new-v display-mode? out-port)
+                                           (and (not (equal? v new-v))
+                                                (latest-size-hook new-v
+                                                                  display-mode?
+                                                                  out-port)))])
+                           (port-count-lines! (current-output-port))
+                           (write-string (build-string col (λ (index) #\space)))
+                           (pretty-write v #:newline? #f))
+                         (send text split-snip col)
+                         (define snips
+                           (let loop ([snip (send text find-snip col 'after)])
+                             (if snip
+                                 (cons (send snip copy) (loop (send snip next)))
+                                 '())))
+                         (define s
+                           (new (get-racket:sexp-snip%-class)
+                                [left-bracket #\(]
+                                [right-bracket #\)]
+                                [saved-snips snips]))
+                         (cond
+                           [(sexp-pp-write-special?)
+                            (write-special s out-port)]
+                           [else
+                            (old-print-hook s display-mode? out-port)])]
+                        [_
+                         (old-print-hook v display-mode? out-port)]))])
       (apply pretty-print v args))))
 (current-print sexp-pp)
 
