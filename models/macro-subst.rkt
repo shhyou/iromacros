@@ -51,6 +51,8 @@ select "Expand S-expression" from the context menu.
    get-racket:text%-class
    open-output-text-editor)])
 
+(define PRETTY-PRINT-WIDTH 60)
+
 (define (prefix-match? prefix)
   (define prefix-str (format "~a«" prefix))
   (λ (v)
@@ -129,7 +131,10 @@ select "Expand S-expression" from the context menu.
                         [_
                          (old-print-hook v display-mode? out-port)]))])
       (apply pretty-print v args))))
-(current-print sexp-pp)
+(current-print
+ (λ args
+   (apply sexp-pp args
+          #:print-columns PRETTY-PRINT-WIDTH)))
 
 (define (traces-R t)
   (traces R t #:pp (λ (term out-port print-columns text)
