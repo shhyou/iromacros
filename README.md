@@ -1,3 +1,5 @@
-qqstaged
+iromacros
 ========
-README text here.
+Various macro-related resources.
+
+- `model/`: Redex models for macros

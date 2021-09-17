@@ -5,7 +5,7 @@ A small-step semantics Redex model of a simple hygienic macro system.
 The model is a slight modification of the macro model presented by
 W. Clinger and J. Rees in the paper Macros That Work.
 
-This Redex model builds on top of the binding forms, designed by Stansifer,
+This Redex model is built on top of the binding forms, designed by Stansifer,
 to emphasis the binding aspect of the environments and hide the mechanical
 refreshening of variables behind the scenes.
 
