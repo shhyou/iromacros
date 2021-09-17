@@ -101,7 +101,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex4 and ex5
   [σ ::= (subst [x ↦ e] ...)]
 
   [x y x′ ::= variable-not-otherwise-mentioned]
-  [e e′ ::= integer variable (e ...) (ρ ⊢ e)]
+  [e e′ ::= integer variable (e ...) (ρ ⊢ e-)]
+  [e- ::= integer variable (e- ...)]
 
   [core ::=
         integer
