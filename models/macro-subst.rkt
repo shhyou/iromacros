@@ -25,7 +25,11 @@ select "Expand S-expression" from the context menu.
     Binding-Safe Programming. In ICFP'14.
     https://doi.org/10.1145/2628136.2628162
 
-    Klein et al., Run Your ResearchOn the Effectiveness of Lightweight
+    Michael D. Adams. Towards the Essence of Hygiene. In POPL'15.
+    https://dl.acm.org/doi/10.1145/2676726.2677013
+    https://michaeldadams.org/papers/hygiene/
+
+    Klein et al., Run Your Research: On the Effectiveness of Lightweight
     Mechanization. In POPL'12.
     https://doi.org/10.1145/2103656.2103691
     https://docs.racket-lang.org/redex/index.html
@@ -49,11 +53,12 @@ select "Expand S-expression" from the context menu.
                                 #:print-columns print-columns)))))
 
 #|
-Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex4 and ex5
+Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 
    (traces-R ex0)
    (traces-R ex0.1)
    (traces-R ex3)
+   (traces-R ex3.3)
    (apply-reduction-relation* R ex4)
    (apply-reduction-relation* R ex5)
    (term (ι ,example-bind-rho))
@@ -165,6 +170,15 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex4 and ex5
                              x
                              (let ([x 2])
                                (mplus x))))))))
+
+(define ex3.3
+  (term (ρ0 ⊢ (let ([x 3])
+                (let-syntax ([let-inc (syntax-rules ()
+                                        [(let-inc z e)
+                                         (let ([z (+ z 1)]) e)])])
+                  (let-syntax ([m (syntax-rules ()
+                                    [(m y) (let-inc x (* x y))])])
+                    (m x)))))))
 
 (define ex4
   (term (ρ0 ⊢ (let ([x 0])

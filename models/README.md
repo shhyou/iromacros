@@ -19,14 +19,18 @@ Side note. To expand the collapsed S-expressions (`(...)`), copy the
 elided forms to the definition window or the prompt area of the REPL and
 select "Expand S-expression" from the context menu.
 
-1.  William Clinger and Jonathan Rees. **Macros That Work**. In _POPL'91_.
+1.  William Clinger and Jonathan Rees. **Macros That Work**. In _POPL'91_.  
     <https://doi.org/10.1145/99583.99607>
 
 2.  Paul Stansifer and Mitchell Wand. **Romeo: A System for More Flexible
-    Binding-Safe Programming**. In _ICFP'14_.
+    Binding-Safe Programming**. In _ICFP'14_.  
     <https://doi.org/10.1145/2628136.2628162>
 
-3.  Klein et al., **Run Your Research: On the Effectiveness of Lightweight
+3.  Michael D. Adams. **Towards the Essence of Hygiene**. In _POPL'15_.
+    - <https://dl.acm.org/doi/10.1145/2676726.2677013>
+    - <https://michaeldadams.org/papers/hygiene/>
+
+4.  Klein et al., **Run Your Research: On the Effectiveness of Lightweight
     Mechanization**. In _POPL'12_.
     - <https://doi.org/10.1145/2103656.2103691>
     - <https://docs.racket-lang.org/redex/index.html>
