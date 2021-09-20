@@ -145,6 +145,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                   [(m) x])])
                   (let ([x 1])
                     (m)))))))
+
 (define ex3.1
   (term (ρ0 ⊢ (let ([x 0])
                 (let-syntax ([mplus (syntax-rules ()
@@ -171,6 +172,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                              (let ([x 2])
                                (mplus x))))))))
 
+;; Adams (2015)
 (define ex3.3
   (term (ρ0 ⊢ (let ([x 3])
                 (let-syntax ([let-inc (syntax-rules ()
@@ -180,6 +182,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                     [(m y) (let-inc x (* x y))])])
                     (m x)))))))
 
+;; Clinger and Wand (2020)
 (define ex4
   (term (ρ0 ⊢ (let ([x 0])
                 (let-syntax ([m1 (syntax-rules ()
@@ -192,6 +195,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                         (let ([x 2])
                           (m2)))))))))
 
+;; Ryan Culpepper & Racket
 (define ex5
   (term (ρ0 ⊢ (let-syntax ([check-bv=? (syntax-rules ()
                                          [(check-bv=? x y)
@@ -292,7 +296,6 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
    ((← ρ ρ_m) ⊢ (substitute* template σ))
    (judgment-holds (matches [ρ_m (x_lit ...)] [ρ (e ...)] (pattern ...)
                             σ))
-   (where (x_fv ...) (list-difference (identifiers template) (dom σ)))
    #;
    (where _ ,(begin
                (printf "expanding ~s\n" (term
