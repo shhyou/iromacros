@@ -58,7 +58,6 @@ select "Expand S-expression" from the context menu.
 Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 
    (traces-R ex0)
-   (traces-R ex0.1)
    (traces-R ex3)
    (traces-R ex3.3)
    (apply-reduction-relation* R ex4)
@@ -75,9 +74,10 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
   [σ ::= (subst [x ↦ e] ...)]
 
   [x y x′ ::= variable-not-otherwise-mentioned]
-  [e e′ ::= integer variable (e ...) (ρ ⊢ e-)]
-  [e- ::= integer variable (e- ...)]
+  [e+-or-core ::= e+ core]
 
+  [e+ ::= (in-hole E (ρ ⊢ e))]
+  [e e′ ::= integer variable (e ...)]
   [core ::=
         integer
         x
@@ -85,16 +85,15 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
         (let* ([x core]) core)
         (if* core core core)
         (core core ...)]
-
   [E ::=
      hole
      (λ (x) E)
-     (let* ([x E]) e)
+     (let* ([x E]) e+)
      (let* ([x core]) E)
-     (if* E e e)
-     (if* core E e)
+     (if* E e+ e+)
+     (if* core E e+)
      (if* core core E)
-     (core ... E e ...)]
+     (core ... E e+ ...)]
 
   #:binding-forms
   (env [x ↦ any] ...) #:exports (shadow x ...)
@@ -257,7 +256,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 (define R
   (reduction-relation
    L
-   #:domain e
+   #:domain e+-or-core
    (--> (in-hole E (ρ ⊢ integer))
         (in-hole E integer)
         "#%datum")
@@ -280,7 +279,7 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
         (in-hole E ((ρ ⊢ e_1) (ρ ⊢ e_2) ...))
 
         (judgment-holds (not-keyword-or-macro ρ e_1))
-        (where #f ,(redex-match? L (ρ ⊢ e) (term (e_1 e_2 ...))))
+        (where #f ,(redex-match? L (ρ ⊢ e′) (term (e_1 e_2 ...))))
         "#%app")
 
    (--> (in-hole E (ρ ⊢ (x_letstx ([x M]) e)))
