@@ -52,6 +52,8 @@ select "Expand S-expression" from the context menu.
                        (sexp-pp term out-port
                                 #:print-columns print-columns)))))
 
+(define transform-verbose? (make-parameter #f))
+
 #|
 Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 
@@ -105,6 +107,49 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 (define example-bind-rho
   (term
    ((env [var ↦ λ]) ⊢ (var (x) (λ (y) (y x))))))
+
+(module+ test
+  (require rackunit)
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex0))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex0.1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex2))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.2))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.3))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex4))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex5)))
 
 (define ex0
   (term (ρ0 ⊢ (let-syntax ([or (syntax-rules ()
@@ -296,17 +341,17 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
    ((← ρ ρ_m) ⊢ (substitute* template σ))
    (judgment-holds (matches [ρ_m (x_lit ...)] [ρ (e ...)] (pattern ...)
                             σ))
-   #;
-   (where _ ,(begin
+   (where _ ,(when (transform-verbose?)
                (printf "expanding ~s\n" (term
                                          (syntax-rules (x_lit ...)
                                            [(x_m pattern ...) template] _ (... ...))))
-               (printf "template FVs: ~a\n" (term (x_fv ...)))
-               (printf "output:\n    ")
+               (printf "  template FVs: ~a\n"
+                       (term (list-difference (identifiers template) (dom σ))))
+               (printf "  output:\n    ")
                (pretty-print (term (substitute* template σ)))
-               (printf "macro env:\n    ")
+               (printf "  macro env:\n    ")
                (pretty-print (term ρ_m))
-               (printf "user env:\n    ")
+               (printf "  user env:\n    ")
                (pretty-print (term ρ))))]
   [(T (transformer ρ_m (syntax-rules (x_lit ...) _ [(x pattern ...) template] ...))
       (ρ ⊢ (x_m e ...)))
