@@ -100,55 +100,20 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
   (transformer ρ M #:refers-to ρ)
   (ρ ⊢ e #:refers-to ρ))
 
+(define-extended-language L+core L
+    #:binding-forms
+    (λ (x) core #:refers-to x)
+    (let* ([x core_1]) core_2 #:refers-to x))
+
+(module+ test-expand
+  (require rackunit))
+
 (define-term ρ0
   (env [lambda ↦ λ] [let ↦ let*] [let-syntax ↦ let-syntax*] [if ↦ if*]))
 
 (define example-bind-rho
   (term
    ((env [var ↦ λ]) ⊢ (var (x) (λ (y) (y x))))))
-
-(module+ test
-  (require rackunit)
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex0))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex0.1))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex1))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex2))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex3))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex3.1))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex3.2))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex3.3))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex4))
-
-  (check-pred
-   (redex-match? L (core))
-   (apply-reduction-relation* R ex5)))
 
 (define ex0
   (term (ρ0 ⊢ (let-syntax ([or (syntax-rules ()
@@ -160,6 +125,17 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                           (< 105 temp))
                       1
                       0))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex0))
+   (term
+    (let* ([temp (read-temperature)])
+      (if* (let* ([temp.or (< temp 65)])
+             (if* temp.or temp.or (< 105 temp)))
+           1
+           0)))))
 
 (define ex0.1
   (term (ρ0 ⊢ (let ([temp #xDEADBEEF])
@@ -173,15 +149,45 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                         1
                         0)))))))
 
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex0.1))
+   (term
+    (let* ([temp #xDEADBEEF])
+      (let* ([temp (read-temperature)])
+        (if* (let* ([temp.or (< temp 65)])
+               (if* temp.or temp.or (< 105 temp)))
+             1
+             0))))))
+
 (define ex1
   (term (ρ0 ⊢ (lambda (x)
                 (lambda (y)
                   x)))))
 
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex1))
+   (term
+    (λ (x)
+      (λ (y)
+        x)))))
+
 (define ex2
   (term (ρ0 ⊢ (lambda (x)
                 (let ([x x])
                   (x x))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex2))
+   (term
+    (λ (x)
+      (let* ([y x])
+        (y y))))))
 
 (define ex3
   (term (ρ0 ⊢ (lambda (x)
@@ -189,6 +195,15 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                   [(m) x])])
                   (let ([x 1])
                     (m)))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex3))
+   (term
+    (λ (x)
+      (let* ([y 1])
+        x)))))
 
 (define ex3.1
   (term (ρ0 ⊢ (let ([x 0])
@@ -199,6 +214,16 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                   (let ([w 2])
 
                     (mplus w)))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex3.1))
+   (term
+    (let* ([x 0])
+      (let* ([w 2])
+        (let* ([z 1])
+          (list x w z)))))))
 
 (define ex3.2
   (term (ρ0 ⊢ (let ([x 0])
@@ -216,6 +241,16 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                              (let ([x 2])
                                (mplus x))))))))
 
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex3.2))
+   (term
+    (let* ([x 0])
+      (let* ([x2 2])
+        (let* ([x1 1])
+          (list x x2 x1)))))))
+
 ;; Adams (2015)
 (define ex3.3
   (term (ρ0 ⊢ (let ([x 3])
@@ -225,6 +260,15 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                   (let-syntax ([m (syntax-rules ()
                                     [(m y) (let-inc x (* x y))])])
                     (m x)))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex3.3))
+   (term
+    (let* ([x 3])
+      (let* ([z (+ x 1)])
+        (* z x))))))
 
 ;; Clinger and Wand (2020)
 (define ex4
@@ -239,6 +283,16 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                         (let ([x 2])
                           (m2)))))))))
 
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex4))
+   (term
+    (let* ([x0 0])
+      (let* ([x1 1])
+        (let* ([x2 2])
+          x0))))))
+
 ;; Ryan Culpepper & Racket
 (define ex5
   (term (ρ0 ⊢ (let-syntax ([check-bv=? (syntax-rules ()
@@ -252,6 +306,21 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                                [(check-macro-x a)
                                                 (check-bv=? x a)])])
                    (check-macro-x x)))))))
+
+(module+ test-expand
+  (check
+   alpha-equivalent?
+   (car (apply-reduction-relation* R ex5))
+   (term
+    (list
+     ;; (check-bv=? x x)
+     (list
+      (let* ([x 0]) (let* ([y 1]) (cons y y)))
+      (let* ([y 1]) (let* ([x 0]) (cons x x))))
+     ;; (check-bv=? x a) where a = x (from a different macro)
+     (list
+      (let* ([x 0]) (let* ([y 1]) (cons x y)))
+      (let* ([y 1]) (let* ([x 0]) (cons x y))))))))
 
 (define R
   (reduction-relation
@@ -357,7 +426,56 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
    (T (transformer ρ_m (syntax-rules (x_lit ...) [(x pattern ...) template] ...))
       (ρ ⊢ (x_m e ...)))])
 
+(module+ test-config
+  (default-language L+core))
 
+(module+ test-syntax
+  (require rackunit)
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex0))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex0.1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex2))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.1))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.2))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex3.3))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex4))
+
+  (check-pred
+   (redex-match? L (core))
+   (apply-reduction-relation* R ex5)))
+
+(module+ test
+  (require (submod ".." test-config)
+           (submod ".." test-syntax)
+           (submod ".." test-expand)))
 
 (define-judgment-form L
   #:contract (not-keyword-or-macro ρ e)
