@@ -105,6 +105,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
     (λ (x) core #:refers-to x)
     (let* ([x core_1]) core_2 #:refers-to x))
 
+(module+ test-syntax
+  (require rackunit))
 (module+ test-expand
   (require rackunit))
 
@@ -126,6 +128,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                       1
                       0))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex0))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -149,6 +153,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                         1
                         0)))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex0.1))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -166,6 +172,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                 (lambda (y)
                   x)))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex1))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -180,6 +188,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                 (let ([x x])
                   (x x))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex2))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -196,6 +206,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                   (let ([x 1])
                     (m)))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex3))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -215,6 +227,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
 
                     (mplus w)))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex3.1))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -241,6 +255,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                              (let ([x 2])
                                (mplus x))))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex3.2))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -261,6 +277,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                     [(m y) (let-inc x (* x y))])])
                     (m x)))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex3.3))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -283,6 +301,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                         (let ([x 2])
                           (m2)))))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex4))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -307,6 +327,8 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
                                                 (check-bv=? x a)])])
                    (check-macro-x x)))))))
 
+(module+ test-syntax
+  (check-pred (redex-match? L e+) ex5))
 (module+ test-expand
   (check
    alpha-equivalent?
@@ -430,8 +452,6 @@ Examples: ex0, ex0.1, ex1, ex2, ex3, ex3.1, ex3.2, ex3.3, ex4 and ex5
   (default-language L+core))
 
 (module+ test-syntax
-  (require rackunit)
-
   (check-pred
    (redex-match? L (core))
    (apply-reduction-relation* R ex0))
